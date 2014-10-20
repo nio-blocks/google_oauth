@@ -1,0 +1,6 @@
+[submodule "http_blocks"]
+	path = http_blocks
+	url = git@github.com:nio-blocks/http_blocks.git
+[submodule "oauth2_mixin"]
+	path = oauth2_mixin
+	url = git@github.com:nio-blocks/oauth2_mixin.git

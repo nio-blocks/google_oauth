@@ -1,0 +1,95 @@
+from nio.metadata.properties import BoolProperty
+from nio.common.signal.base import Signal
+from urllib.parse import urlencode
+from .http_blocks.rest.rest_block import RESTPolling
+from .oauth2_mixin.oauth2 import OAuth2
+
+
+class GoogleOAuth(OAuth2, RESTPolling):
+
+    _URL_PREFIX = 'https://www.googleapis.com/'
+
+    # Whether or not to return readable results from Google
+    # The raw response contains richer information but is harder to parse.
+    # By checking this, the results will be parsed and split into more
+    # readable signals. Recommended to be checked unless you need some
+    # advanced information from the Google API
+    pretty_results = BoolProperty(title="Pretty Results", default=True)
+
+    def __init__(self):
+        super().__init__()
+
+    def get_google_scope(self):
+        """ This should be implemented by the base block and return the
+        scope needed for API access """
+        return NotImplemented
+
+    def get_url_suffix(self):
+        """ Return the URL suffix to be appended, without the leading slash.
+
+        Will probably have a form similar to this:
+        analytics/v3/data/ga
+        """
+        return NotImplemented
+
+    def get_url_parameters(self):
+        """ Return a dictionary containing URL parameters to include """
+        return dict()
+
+    def _prepare_url(self, paging=False):
+        """ Overridden - Build the request URL and headers for the request
+
+        TODO: Handle token access and refresh
+        """
+        token = self.get_access_token(self.get_google_scope())
+
+        self._url = "{0}{1}?{2}".format(
+            self._URL_PREFIX,
+            self.get_url_suffix(),
+            urlencode(self.get_url_parameters()))
+
+        return {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {0}".format(token)
+        }
+
+    def _process_response(self, resp):
+        """ Overridden from parent - make sure we got a 200 and valid JSON """
+        status = resp.status_code
+        if status != 200:
+            self._logger.error("Status {0} returned while requesting : {1}"
+                               .format(status, resp))
+        return self._get_signals_from_results(resp.json()), False
+
+    def _get_signals_from_results(self, results):
+        """ Returns a list of signals based on a results dictionary.
+
+        If prett_results is checked, do some parsing here and spit out
+        individual signals for every row. See unit test for examples
+        """
+        if not isinstance(results, dict):
+            raise TypeError("Results were not parsed properly")
+
+        if not self.pretty_results:
+            return [Signal(results)]
+
+        column_information = results.get('columnHeaders', [])
+        self._logger.debug(
+            "Building signals using columns {0}".format(column_information))
+
+        signals = [
+            Signal(self._build_signal_dictionary(column_information, row))
+            for row in results.get('rows', [])]
+
+        return signals
+
+    def _build_signal_dictionary(self, columns, row):
+        """Build a signal from a particular row based on column information"""
+        sig_out = dict()
+        for index, col in enumerate(columns):
+            if col.get('dataType') == 'INTEGER':
+                sig_out[col['name']] = int(row[index])
+            else:
+                sig_out[col['name']] = row[index]
+
+        return sig_out
