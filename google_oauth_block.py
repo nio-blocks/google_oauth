@@ -61,7 +61,12 @@ class GoogleOAuth(OAuth2, RESTPolling):
 
         TODO: Handle token access and refresh
         """
-        token = self.get_access_token(self.get_google_scope())
+        try:
+            token = self.get_access_token(self.get_google_scope())
+        except OAuth2Exception as oae:
+            self._logger.error(
+                "Error obtaining access token : {0}".format(oae))
+            token = "INVALID_TOKEN"
 
         self._url = "{0}{1}?{2}".format(
             self._URL_PREFIX,
