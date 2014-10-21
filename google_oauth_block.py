@@ -31,6 +31,7 @@ class GoogleOAuth(OAuth2, RESTPolling):
 
     def __init__(self):
         super().__init__()
+        self._access_token = None
 
     def get_google_scope(self):
         """ This should be implemented by the base block and return the
@@ -56,18 +57,17 @@ class GoogleOAuth(OAuth2, RESTPolling):
             params[param.prop_name] = param.prop_value
         return params
 
-    def _prepare_url(self, paging=False):
-        """ Overridden - Build the request URL and headers for the request
-
-        TODO: Handle token access and refresh
-        """
+    def _authenticate(self):
+        """Overridden from RESTPolling block - Obtain and set access token"""
         try:
-            token = self.get_access_token(self.get_google_scope())
+            self._access_token = self.get_access_token(self.get_google_scope())
         except OAuth2Exception as oae:
             self._logger.error(
                 "Error obtaining access token : {0}".format(oae))
-            token = "INVALID_TOKEN"
+            self._access_token = None
 
+    def _prepare_url(self, paging=False):
+        """ Overridden - Build the request URL and headers for the request """
         self._url = "{0}{1}?{2}".format(
             self._URL_PREFIX,
             self.get_url_suffix(),
@@ -75,7 +75,7 @@ class GoogleOAuth(OAuth2, RESTPolling):
 
         return {
             "Content-Type": "application/json",
-            "Authorization": "Bearer {0}".format(token)
+            "Authorization": "Bearer {0}".format(self._access_token)
         }
 
     def _process_response(self, resp):
