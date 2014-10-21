@@ -1,8 +1,14 @@
-from nio.metadata.properties import BoolProperty
+from nio.metadata.properties import BoolProperty, ListProperty, \
+    PropertyHolder, StringProperty
 from nio.common.signal.base import Signal
 from urllib.parse import urlencode
 from .http_blocks.rest.rest_block import RESTPolling
 from .oauth2_mixin.oauth2 import OAuth2
+
+
+class URLParameter(PropertyHolder):
+    prop_name = StringProperty(title="Property Name")
+    prop_value = StringProperty(title="Property Value")
 
 
 class GoogleOAuth(OAuth2, RESTPolling):
@@ -15,6 +21,13 @@ class GoogleOAuth(OAuth2, RESTPolling):
     # readable signals. Recommended to be checked unless you need some
     # advanced information from the Google API
     pretty_results = BoolProperty(title="Pretty Results", default=True)
+
+    # Google APIs tend to have many optional additional paramters. This
+    # property allows a configurer to add and remove optional parameters with
+    # minimal overhead. To use these properties, just call the get_addl_params
+    # method when reporting url parameters in the subclass
+    addl_params = ListProperty(
+        URLParameter, title="Additional Parameters", default=[])
 
     def __init__(self):
         super().__init__()
@@ -35,6 +48,13 @@ class GoogleOAuth(OAuth2, RESTPolling):
     def get_url_parameters(self):
         """ Return a dictionary containing URL parameters to include """
         return dict()
+
+    def get_addl_params(self):
+        """ Return a dictionary of any additional configured URL parameters """
+        params = dict()
+        for param in self.addl_params:
+            params[param.prop_name] = param.prop_value
+        return params
 
     def _prepare_url(self, paging=False):
         """ Overridden - Build the request URL and headers for the request

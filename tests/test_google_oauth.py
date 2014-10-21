@@ -72,3 +72,23 @@ class TestGoogleOAuth(NIOBlockTestCase):
         # We just want the original response when it's not pretty
         self.assertEqual(len(sigs_out), 1)
         self.assertIsNotNone(sigs_out[0].columnHeaders)
+
+    def test_addl_params(self):
+        block = GoogleOAuth()
+        self.configure_block(block, {
+            "addl_params": [
+                {
+                    "prop_name": "param1",
+                    "prop_value": "value1"
+                },
+                {
+                    "prop_name": "param2",
+                    "prop_value": "value2"
+                }
+            ]
+        })
+
+        params = block.get_addl_params()
+        self.assertEqual(params['param1'], 'value1')
+        self.assertEqual(params['param2'], 'value2')
+
