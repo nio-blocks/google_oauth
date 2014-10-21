@@ -73,10 +73,11 @@ class GoogleOAuth(OAuth2, RESTPolling):
             self.get_url_suffix(),
             urlencode(self.get_url_parameters()))
 
-        return {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {0}".format(self._access_token)
+        headers = {
+            "Content-Type": "application/json"
         }
+        headers.update(self.get_access_token_headers(self._access_token))
+        return headers
 
     def _process_response(self, resp):
         """ Overridden from parent - make sure we got a 200 and valid JSON """
