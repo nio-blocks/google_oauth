@@ -3,7 +3,7 @@ from nio.metadata.properties import BoolProperty, ListProperty, \
 from nio.common.signal.base import Signal
 from urllib.parse import urlencode
 from .http_blocks.rest.rest_block import RESTPolling
-from .oauth2_mixin.oauth2 import OAuth2
+from .oauth2_mixin.oauth2 import OAuth2, OAuth2Exception
 
 
 class URLParameter(PropertyHolder):
@@ -61,6 +61,8 @@ class GoogleOAuth(OAuth2, RESTPolling):
         """Overridden from RESTPolling block - Obtain and set access token"""
         try:
             self._access_token = self.get_access_token(self.get_google_scope())
+            self._logger.debug("Obtained access token {0}".format(
+                self._access_token))
         except OAuth2Exception as oae:
             self._logger.error(
                 "Error obtaining access token : {0}".format(oae))
