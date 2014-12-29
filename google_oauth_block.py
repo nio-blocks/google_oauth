@@ -1,6 +1,7 @@
 from nio.metadata.properties import BoolProperty, ListProperty, \
-    PropertyHolder, StringProperty
+    PropertyHolder, StringProperty, TimeDeltaProperty
 from nio.common.signal.base import Signal
+from nio.modules.scheduler import Job
 from urllib.parse import urlencode
 from .http_blocks.rest.rest_block import RESTPolling
 from .oauth2_mixin.oauth2 import OAuth2, OAuth2Exception
@@ -29,9 +30,20 @@ class GoogleOAuth(OAuth2, RESTPolling):
     addl_params = ListProperty(
         URLParameter, title="Additional Parameters", default=[])
 
+    # We should periodically re-authenticate with Google, this is the interval
+    # to do so.
+    # Ideally, we use the expiry time in the OAuth token that we get back, but
+    # that will require a non-backwards compatible change to the OAuth2 mixin,
+    # so for now, having an extra non-visible property will have to do
+    reauth_interval = TimeDeltaProperty(
+        title="Reauthenticate Interval",
+        visible=False,
+        default={'seconds': 2400})  # Default to 40 mins
+
     def __init__(self):
         super().__init__()
         self._access_token = None
+        self._reauth_job = None
 
     def get_google_scope(self):
         """ This should be implemented by the base block and return the
@@ -63,6 +75,15 @@ class GoogleOAuth(OAuth2, RESTPolling):
             self._access_token = self.get_access_token(self.get_google_scope())
             self._logger.debug("Obtained access token {0}".format(
                 self._access_token))
+
+            if self._reauth_job:
+                self._reauth_job.cancel()
+
+            # Remember to reauthenticate at a certain point if it's configured
+            if self.reauth_interval.total_seconds() > 0:
+                self._reauth_job = Job(
+                    self._authenticate, self.reauth_interval, False)
+
         except OAuth2Exception as oae:
             self._logger.error(
                 "Error obtaining access token : {0}".format(oae))
