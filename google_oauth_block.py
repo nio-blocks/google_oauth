@@ -4,7 +4,8 @@ from nio.common.signal.base import Signal
 from nio.modules.scheduler import Job
 from urllib.parse import urlencode
 from .http_blocks.rest.rest_block import RESTPolling
-from .oauth2_mixin.oauth2 import OAuth2, OAuth2Exception
+from .oauth2_mixin.oauth2 import OAuth2Exception
+from .oauth2_mixin.oauth2_service import OAuth2ServiceAccount
 
 
 class URLParameter(PropertyHolder):
@@ -12,7 +13,7 @@ class URLParameter(PropertyHolder):
     prop_value = StringProperty(title="Property Value")
 
 
-class GoogleOAuth(OAuth2, RESTPolling):
+class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
 
     _URL_PREFIX = 'https://www.googleapis.com/'
 
@@ -72,9 +73,10 @@ class GoogleOAuth(OAuth2, RESTPolling):
     def _authenticate(self):
         """Overridden from RESTPolling block - Obtain and set access token"""
         try:
-            self._access_token = self.get_access_token(self.get_google_scope())
+            access_token = self.get_access_token(
+                scope=self.get_google_scope())
             self._logger.debug("Obtained access token {0}".format(
-                self._access_token))
+                access_token))
 
             if self._reauth_job:
                 self._reauth_job.cancel()
@@ -99,7 +101,7 @@ class GoogleOAuth(OAuth2, RESTPolling):
         headers = {
             "Content-Type": "application/json"
         }
-        headers.update(self.get_access_token_headers(self._access_token))
+        headers.update(self.get_access_token_headers())
         return headers
 
     def _process_response(self, resp):
