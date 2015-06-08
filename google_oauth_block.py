@@ -43,7 +43,6 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
 
     def __init__(self):
         super().__init__()
-        self._access_token = None
         self._reauth_job = None
 
     def get_google_scope(self):
@@ -89,7 +88,6 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
         except OAuth2Exception as oae:
             self._logger.error(
                 "Error obtaining access token : {0}".format(oae))
-            self._access_token = None
 
     def _prepare_url(self, paging=False):
         """ Overridden - Build the request URL and headers for the request """
