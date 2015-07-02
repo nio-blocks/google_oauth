@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from ..google_oauth_block import GoogleOAuth
 from nio.util.support.block_test_case import NIOBlockTestCase
 
@@ -46,9 +47,10 @@ class TestGoogleOAuth(NIOBlockTestCase):
     def test_pretty_results(self):
         """ Test that results can get parsed correctly """
         block = GoogleOAuth()
-        self.configure_block(block, {
-            "pretty_results": True
-        })
+        with patch.object(block, '_authenticate'):
+            self.configure_block(block, {
+                "pretty_results": True
+            })
 
         sigs_out = block._get_signals_from_results(SAMPLE_GOOGLE_RESPONSE)
 
@@ -63,9 +65,10 @@ class TestGoogleOAuth(NIOBlockTestCase):
     def test_no_pretty_results(self):
         """ Test that unchecking the box does not parse results """
         block = GoogleOAuth()
-        self.configure_block(block, {
-            "pretty_results": False
-        })
+        with patch.object(block, '_authenticate'):
+            self.configure_block(block, {
+                "pretty_results": False
+            })
 
         sigs_out = block._get_signals_from_results(SAMPLE_GOOGLE_RESPONSE)
 
@@ -75,20 +78,20 @@ class TestGoogleOAuth(NIOBlockTestCase):
 
     def test_addl_params(self):
         block = GoogleOAuth()
-        self.configure_block(block, {
-            "addl_params": [
-                {
-                    "prop_name": "param1",
-                    "prop_value": "value1"
-                },
-                {
-                    "prop_name": "param2",
-                    "prop_value": "value2"
-                }
-            ]
-        })
+        with patch.object(block, '_authenticate'):
+            self.configure_block(block, {
+                "addl_params": [
+                    {
+                        "prop_name": "param1",
+                        "prop_value": "value1"
+                    },
+                    {
+                        "prop_name": "param2",
+                        "prop_value": "value2"
+                    }
+                ]
+            })
 
         params = block.get_addl_params()
         self.assertEqual(params['param1'], 'value1')
         self.assertEqual(params['param2'], 'value2')
-
