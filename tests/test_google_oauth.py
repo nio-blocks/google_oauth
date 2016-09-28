@@ -1,6 +1,6 @@
 from unittest.mock import patch
 from ..google_oauth_block import GoogleOAuth
-from nio.util.support.block_test_case import NIOBlockTestCase
+from nio.testing.block_test_case import NIOBlockTestCase
 
 SAMPLE_GOOGLE_RESPONSE = \
     {'columnHeaders':

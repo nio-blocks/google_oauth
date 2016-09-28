@@ -1,16 +1,16 @@
-from nio.metadata.properties import BoolProperty, ListProperty, \
+from nio.properties import BoolProperty, ListProperty, \
     PropertyHolder, StringProperty, TimeDeltaProperty
-from nio.common.signal.base import Signal
+from nio.signal.base import Signal
 from nio.modules.scheduler import Job
 from urllib.parse import urlencode
 from .http_blocks.rest.rest_block import RESTPolling
-from .oauth2_mixin.oauth2 import OAuth2Exception
+from .oauth2_mixin.oauth2_base import OAuth2Exception
 from .oauth2_mixin.oauth2_service import OAuth2ServiceAccount
 
 
 class URLParameter(PropertyHolder):
-    prop_name = StringProperty(title="Property Name")
-    prop_value = StringProperty(title="Property Value")
+    prop_name = StringProperty(title="Property Name", default='')
+    prop_value = StringProperty(title="Property Value", default='')
 
 
 class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
@@ -65,8 +65,8 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
     def get_addl_params(self):
         """ Return a dictionary of any additional configured URL parameters """
         params = dict()
-        for param in self.addl_params:
-            params[param.prop_name] = param.prop_value
+        for param in self.addl_params():
+            params[param.prop_name()] = param.prop_value()
         return params
 
     def _authenticate(self):
@@ -74,19 +74,19 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
         try:
             access_token = self.get_access_token(
                 scope=self.get_google_scope())
-            self._logger.debug("Obtained access token {0}".format(
+            self.logger.debug("Obtained access token {0}".format(
                 access_token))
 
             if self._reauth_job:
                 self._reauth_job.cancel()
 
             # Remember to reauthenticate at a certain point if it's configured
-            if self.reauth_interval.total_seconds() > 0:
+            if self.reauth_interval().total_seconds() > 0:
                 self._reauth_job = Job(
-                    self._authenticate, self.reauth_interval, False)
+                    self._authenticate, self.reauth_interval(), False)
 
         except OAuth2Exception as oae:
-            self._logger.error(
+            self.logger.error(
                 "Error obtaining access token : {0}".format(oae))
 
     def _prepare_url(self, paging=False):
@@ -106,7 +106,7 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
         """ Overridden from parent - make sure we got a 200 and valid JSON """
         status = resp.status_code
         if status != 200:
-            self._logger.error("Status {0} returned while requesting : {1}"
+            self.logger.error("Status {0} returned while requesting : {1}"
                                .format(status, resp))
         return self._get_signals_from_results(resp.json()), False
 
@@ -119,11 +119,11 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
         if not isinstance(results, dict):
             raise TypeError("Results were not parsed properly")
 
-        if not self.pretty_results:
+        if not self.pretty_results():
             return [Signal(results)]
 
         column_information = results.get('columnHeaders', [])
-        self._logger.debug(
+        self.logger.debug(
             "Building signals using columns {0}".format(column_information))
 
         signals = [
