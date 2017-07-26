@@ -1,5 +1,5 @@
 {
-    "nio/GoogleOauth": {
+    "nio/GoogleOAuth": {
         "Version": "1.0.0",
         "Input": {
             "Description": "None"
