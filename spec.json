@@ -1,22 +1,10 @@
 {
-    "nio/GoogleOAuth": {
-        "Version": "1.0.0",
-        "Input": {
-            "Description": "None"
-        },
-        "Commands": {},
-        "Category": "WebService",
-        "Properties": {
-            "Reauthenticate Interval": {
-                "description": "time in between authentications with Google"
-            },
-            "Additional Parameters": {
-                "description": "any Google API optional parameters"
-            }
-        },
-        "Output": {
-            "Description": "An output signal of the queried analytics data. Details of the Google Analytics data can be found [here](https://developers.google.com/analytics/devguides/reporting/core/v3/reference#data_response). The following is a sample of commonly included attributes, but note that not all will be included on every signal:\n* kind\n* id\n* query\n- start-date\n- end-date\n- ids\n- filters\n- start-index\n- max-results\n* itemsPerPage\n* totalResults\n* previousLink\n* nextLink\n* profileInfo\n- profileId\n- accountId\n- profileName\n* columnHeaders\n- name\n- columnType\n* rows"
-        },
-        "Description": "Collect data from Google Analytics and output to a signal."
-    }
+  "nio/GoogleOAuth": {
+    "version": "0.0.1",
+    "description": "",
+    "inputs": {},
+    "outputs": {},
+    "properties": {},
+    "commands": {}
+  }
 }
