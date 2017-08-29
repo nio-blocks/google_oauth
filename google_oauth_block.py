@@ -1,9 +1,11 @@
-from nio.properties import BoolProperty, ListProperty, \
-    PropertyHolder, StringProperty, TimeDeltaProperty
+from urllib.parse import urlencode
+
+from nio.properties import (BoolProperty, ListProperty, PropertyHolder,
+                            StringProperty, TimeDeltaProperty, VersionProperty)
 from nio.signal.base import Signal
 from nio.modules.scheduler import Job
-from urllib.parse import urlencode
-from .http_blocks.rest.rest_block import RESTPolling
+
+from .rest_polling.rest_block import RESTPolling
 from .oauth2_mixin.oauth2_base import OAuth2Exception
 from .oauth2_mixin.oauth2_service import OAuth2ServiceAccount
 
@@ -40,6 +42,8 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
         title="Reauthenticate Interval",
         visible=False,
         default={'seconds': 2400})  # Default to 40 mins
+
+    version = VersionProperty("1.0.0")
 
     def __init__(self):
         super().__init__()
@@ -107,7 +111,7 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
         status = resp.status_code
         if status != 200:
             self.logger.error("Status {0} returned while requesting : {1}"
-                               .format(status, resp))
+                              .format(status, resp))
         return self._get_signals_from_results(resp.json()), False
 
     def _get_signals_from_results(self, results):
