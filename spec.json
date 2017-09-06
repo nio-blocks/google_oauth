@@ -2,6 +2,9 @@
   "nio/GoogleOAuth": {
     "version": "1.0.0",
     "description": "Collect data from Google Analytics and output to a signal.",
+    "categories": [
+      "Web Data"
+    ],
     "properties": {
       "addl_params": {
         "title": "Additional Parameters",
