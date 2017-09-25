@@ -43,7 +43,7 @@ class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
         visible=False,
         default={'seconds': 2400})  # Default to 40 mins
 
-    version = VersionProperty("1.0.0")
+    version = VersionProperty("1.0.1")
 
     def __init__(self):
         super().__init__()

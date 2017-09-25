@@ -1,6 +1,6 @@
 {
   "nio/GoogleOAuth": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Collect data from Google Analytics and output to a signal.",
     "categories": [
       "Web Data"
