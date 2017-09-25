@@ -1,6 +1,6 @@
 [submodule "oauth2_mixin"]
 	path = oauth2_mixin
-	url = git@github.com:nio-blocks/oauth2_mixin.git
+	url = git://github.com/nio-blocks/oauth2_mixin.git
 [submodule "rest_polling"]
 	path = rest_polling
-	url = git@github.com:nio-blocks/rest_polling.git
+	url = git://github.com/nio-blocks/rest_polling.git
