@@ -4,6 +4,7 @@ from nio.properties import (BoolProperty, ListProperty, PropertyHolder,
                             StringProperty, TimeDeltaProperty, VersionProperty)
 from nio.signal.base import Signal
 from nio.modules.scheduler import Job
+from nio.util.discovery import not_discoverable
 
 from .rest_polling.rest_block import RESTPolling
 from .oauth2_mixin.oauth2_base import OAuth2Exception
@@ -15,6 +16,7 @@ class URLParameter(PropertyHolder):
     prop_value = StringProperty(title="Property Value", default='')
 
 
+@not_discoverable
 class GoogleOAuth(OAuth2ServiceAccount, RESTPolling):
 
     _URL_PREFIX = 'https://www.googleapis.com/'
