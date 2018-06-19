@@ -1,7 +1,0 @@
-{
-  "nio/GoogleOAuth": {
-    "language": "Python",
-    "url": "git://github.com/nio-blocks/google_oauth.git",
-    "version": "1.0.1"
-  }
-}
